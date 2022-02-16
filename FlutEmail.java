@@ -33,8 +33,8 @@ public class FlutEmail {
         properties.put("mail.smtp.host", "smtp.gmail.com");
         properties.put("mail.smtp.port", "587");
         
-        String user = "annikafries2@gmail.com"; //E-Mail Adresse, von der die PDFs verschickt werden
-        String password = "Test1234#!"; //Passwort zu obengenannter E-Mail Adresse
+        String user = "***"; //E-Mail Adresse, von der die PDFs verschickt werden
+        String password = "***"; //Passwort zu obengenannter E-Mail Adresse
         
         Session session = Session.getInstance(properties, new Authenticator() {
             @Override
