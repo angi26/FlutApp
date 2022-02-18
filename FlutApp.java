@@ -20,7 +20,8 @@ public class FlutApp extends Application {
     }
 
     @Override
-    public void start(Stage stage) throws Exception {
+    public void start(Stage stage) {
+        
         TabPane tabPane = new TabPane();
 
         Tab tab1 = new Tab("Flutspenden");

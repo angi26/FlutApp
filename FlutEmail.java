@@ -25,16 +25,24 @@ import javax.mail.internet.MimeMultipart;
  */
 public class FlutEmail {
     
-    public static void email(String empfaenger) throws Exception {
+    String host = PropertiesMain.readValue("host");
+    String port = PropertiesMain.readValue("port");
+    String user = PropertiesMain.readValue("user"); //E-Mail Adresse, von der die PDFs verschickt werden
+    String password = PropertiesMain.readValue("password"); //Passwort zu obengenannter E-Mail Adresse
+    
+    String inhalt = PropertiesMain.readValue("inhalt");
+    String pathRechnung = PropertiesMain.readValue("pathRechnung");
+    String betreff = PropertiesMain.readValue("betreff");
+    
+    public void email(String empfaenger) throws Exception {
+        
         
         Properties properties = new Properties();
         properties.put("mail.smtp.auth", "true");
         properties.put("mail.smtp.starttls.enable", "true");
-        properties.put("mail.smtp.host", "smtp.gmail.com");
-        properties.put("mail.smtp.port", "587");
-        
-        String user = "***"; //E-Mail Adresse, von der die PDFs verschickt werden
-        String password = "***"; //Passwort zu obengenannter E-Mail Adresse
+        properties.put("mail.smtp.host", host);
+        properties.put("mail.smtp.port", port);
+
         
         Session session = Session.getInstance(properties, new Authenticator() {
             @Override
@@ -50,36 +58,28 @@ public class FlutEmail {
         System.out.println("Ihre E-Mail wurde erfolgreich versendet!");
     }
     
-    private static Message prepareMessage(Session session, String user, String empfaenger) throws MessagingException, IOException {
+    public Message prepareMessage(Session session, String user, String empfaenger) throws MessagingException, IOException {
         
         PdfErstellen pdf = new PdfErstellen();
-        
-        String filename = "/home/annika/NetBeansProjects/FlutApp/Rechnung.pdf";        
 
         try {
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress(user));
             message.setRecipient(Message.RecipientType.TO, new InternetAddress(empfaenger));
-            message.setSubject("Spendenquittung Flutkatastrophe");
+            message.setSubject(betreff);
             
             MimeMultipart mimeMultipart = new MimeMultipart();
  
-            MimeBodyPart text = new MimeBodyPart();
-            text.setText("""
-                         Sehr geehrte Damen und Herren, 
-                         
-                         im Anhang Ihre Spendenquittung f\u00fcr Ihre Spende an die Flutkatastrophenopfer.
-                         
-                         Vielen Dank f\u00fcr Ihre Spende!
-                         """);
-            text.setDisposition(MimeBodyPart.INLINE);
+            MimeBodyPart emailText = new MimeBodyPart();
+            emailText.setText(inhalt);
+            emailText.setDisposition(MimeBodyPart.INLINE);
 
-            File file = new File(filename);
+            File file = new File(pathRechnung);
             MimeBodyPart attachement = new MimeBodyPart();
             attachement.setDataHandler(new DataHandler(new FileDataSource(file)));
-            attachement.setFileName(filename);
+            attachement.setFileName(pathRechnung);
             attachement.setDisposition(MimeBodyPart.ATTACHMENT);
-            mimeMultipart.addBodyPart(text);
+            mimeMultipart.addBodyPart(emailText);
             mimeMultipart.addBodyPart(attachement);
 
             message.setContent(mimeMultipart);

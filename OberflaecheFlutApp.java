@@ -363,7 +363,8 @@ public class OberflaecheFlutApp {
                 PdfErstellen.betrag = selectedFlutspende.getBetrag();
                 PdfErstellen.datum = selectedFlutspende.getDatum();
              
-                FlutEmail.email("friesannika@yahoo.de"); //normalerweise E-Mail aus Textfield oder Tabelle auslesen
+                FlutEmail fe = new FlutEmail();
+                fe.email(selectedFlutspende.getEmail()); //schickt die E-Mail an die Adresse aus der ausgeählten Zeile
             } catch (Exception ex) {
                 Logger.getLogger(OberflaecheFlutApp.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -373,12 +374,8 @@ public class OberflaecheFlutApp {
     //zeigt die Daten aus der Datei in der Tabelle an
     private void anzeigenBtnEreignis() {
         anzeigenBtn.setOnAction(e -> {
-            flutspendenTab.getItems().clear();;
-            try {
-                FileReading();
-            } catch (IOException ex) {
-                Logger.getLogger(OberflaecheFlutApp.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            flutspendenTab.getItems().clear();
+            fileReading();
         });
     }
     
@@ -386,97 +383,83 @@ public class OberflaecheFlutApp {
     private void hinzufuegenBtnEreignis() {
         hinzufuegenBtn.setOnAction(e -> {
             
-            //neue Daten in Tabelle anzeigen/speichern
-            Flutspenden neuerInhalt = new Flutspenden();
-            
-            neuerInhalt.setRechnungsnr(rechnungsnrTF.getText());
-            neuerInhalt.setNachname(nachnameTF.getText());
-            neuerInhalt.setVorname(vornameTF.getText());
-            neuerInhalt.setStrasse(strasseTF.getText());
-            neuerInhalt.setHausnr(hausnrTF.getText());
-            neuerInhalt.setPlz(plzTF.getText());
-            neuerInhalt.setOrt(ortTF.getText());
-            neuerInhalt.setEmail(emailTF.getText());
-            neuerInhalt.setBetrag(betragTF.getText());
-            neuerInhalt.setDatum(datumTF.getText());
-            
-            flutspendenListe.add(neuerInhalt);
-                        
-            //Felder leeren
-            rechnungsnrTF.clear();
-            nachnameTF.clear();
-            vornameTF.clear();
-            strasseTF.clear();
-            hausnrTF.clear();
-            plzTF.clear();
-            ortTF.clear();
-            emailTF.clear();    
-            betragTF.clear();
-            datumTF.clear();
+            tabelleBefuellenTF();
+            felderLeeren();
         });
     }
 
     //speichert die geänderten und neuen Daten in der Datei
     private void speichernBtnEreignis() {
         speichernBtn.setOnAction(e -> {
-            try {                
-                FileWriting();
-            } catch (IOException ex) {
-                Logger.getLogger(OberflaecheFlutApp.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            fileWriting();
 
         });
     }
     
-    public void FileReading() throws FileNotFoundException, IOException {
+    public void fileReading() {
 
-        String path = "/home/annika/Dokumente/IT15-1/FlutApp/FlutspendenListe";
-        FileReader fr = new FileReader(path);
+        FileReader fr = null;
+        try {
+            String pathListe = PropertiesMain.readValue("pathListe");
+            fr = new FileReader(pathListe);
+            try (BufferedReader reader = new BufferedReader(fr)) {
+                String textFromFile;
+                while ((textFromFile = reader.readLine()) != null) {
+                    String[] parts = textFromFile.split("#");
 
-        try (BufferedReader reader = new BufferedReader(fr)) {
-            String textFromFile;
-            while ((textFromFile = reader.readLine()) != null) {
-                String[] parts = textFromFile.split("#");
-                
-                //Daten aus Datei splitten                                    
-                //letzte Daten in Textfields
-                String rechnungsnr = parts[0];
-                String nachname = parts[1];
-                String vorname = parts[2];
-                String strasse = parts[3];
-                String hausnr = parts[4];
-                String plz = parts[5];
-                String ort = parts[6];
-                String email = parts[7];
-                String betrag = parts[8];
-                String datum = parts[9];
-                
-                //gesplittete Daten in Tabelle einfügen
-                Flutspenden inhalt = new Flutspenden();
-                
-                inhalt.setRechnungsnr(rechnungsnr);
-                inhalt.setNachname(nachname);
-                inhalt.setVorname(vorname);
-                inhalt.setStrasse(strasse);
-                inhalt.setHausnr(hausnr);
-                inhalt.setPlz(plz);
-                inhalt.setOrt(ort);
-                inhalt.setEmail(email);
-                inhalt.setBetrag(betrag);
-                inhalt.setDatum(datum);
-                
-                flutspendenListe.add(inhalt);
+                    //Daten aus Datei splitten
+                    //letzte Daten in Textfields
+                    String rechnungsnr = parts[0];
+                    String nachname = parts[1];
+                    String vorname = parts[2];
+                    String strasse = parts[3];
+                    String hausnr = parts[4];
+                    String plz = parts[5];
+                    String ort = parts[6];
+                    String email = parts[7];
+                    String betrag = parts[8];
+                    String datum = parts[9];
+
+                    //gesplittete Daten in Tabelle einfügen
+                    Flutspenden inhalt = new Flutspenden();
+
+                    inhalt.setRechnungsnr(rechnungsnr);
+                    inhalt.setNachname(nachname);
+                    inhalt.setVorname(vorname);
+                    inhalt.setStrasse(strasse);
+                    inhalt.setHausnr(hausnr);
+                    inhalt.setPlz(plz);
+                    inhalt.setOrt(ort);
+                    inhalt.setEmail(email);
+                    inhalt.setBetrag(betrag);
+                    inhalt.setDatum(datum);
+
+                    flutspendenListe.add(inhalt);
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(OberflaecheFlutApp.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(OberflaecheFlutApp.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                fr.close();
+            } catch (IOException ex) {
+                Logger.getLogger(OberflaecheFlutApp.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
     
-    public void FileWriting() throws FileNotFoundException, IOException {
-
+    public void fileWriting() {
+        
+        FileWriter fr = null;
+        BufferedWriter writer = null;
+        
+        String pathListe = PropertiesMain.readValue("pathListe");
+            
         try {
-            String path = "/home/annika/Dokumente/IT15-1/FlutApp/FlutspendenListe";
-            FileWriter fr = new FileWriter(path);
-            BufferedWriter writer = new BufferedWriter(fr);
-
+            fr = new FileWriter(pathListe);
+            writer = new BufferedWriter(fr);
             ObservableList<Flutspenden> flutspendenListe = flutspendenTab.getItems();
             for (int i = 0; i < flutspendenListe.size(); i++) {
                 Flutspenden x = flutspendenListe.get(i);
@@ -495,11 +478,49 @@ public class OberflaecheFlutApp {
                         + plz + "#" + ort + "#" + email + "#" + betrag + "#" + datum + System.getProperty("line.separator");
 
                 writer.write(textToWrite);
+                
             }
-            writer.close();
         } catch (IOException ex) {
             Logger.getLogger(OberflaecheFlutApp.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                writer.close();
+            } catch (IOException ex) {
+                Logger.getLogger(OberflaecheFlutApp.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
+    }
+    
+    public void felderLeeren() {
+        
+        rechnungsnrTF.clear();
+        nachnameTF.clear();
+        vornameTF.clear();
+        strasseTF.clear();
+        hausnrTF.clear();
+        plzTF.clear();
+        ortTF.clear();
+        emailTF.clear();
+        betragTF.clear();
+        datumTF.clear();
+    }
+    
+    public void tabelleBefuellenTF() {
+        
+        Flutspenden neuerInhalt = new Flutspenden();
+
+        neuerInhalt.setRechnungsnr(rechnungsnrTF.getText());
+        neuerInhalt.setNachname(nachnameTF.getText());
+        neuerInhalt.setVorname(vornameTF.getText());
+        neuerInhalt.setStrasse(strasseTF.getText());
+        neuerInhalt.setHausnr(hausnrTF.getText());
+        neuerInhalt.setPlz(plzTF.getText());
+        neuerInhalt.setOrt(ortTF.getText());
+        neuerInhalt.setEmail(emailTF.getText());
+        neuerInhalt.setBetrag(betragTF.getText());
+        neuerInhalt.setDatum(datumTF.getText());
+        
+        flutspendenListe.add(neuerInhalt);
     }
 
 }

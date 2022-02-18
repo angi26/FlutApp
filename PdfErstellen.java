@@ -15,6 +15,12 @@ import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
  */
 public class PdfErstellen {
     
+    String pathImage = PropertiesMain.readValue("pathImage");
+    String pdfDatei = PropertiesMain.readValue("pdfDatei");
+    String betreff = PropertiesMain.readValue("betreff");
+    String inhalt = PropertiesMain.readValue("inhalt");
+    String fusszeile = PropertiesMain.readValue("fusszeile");
+    
     //Dokument Erstellung und Seite hinzufügen
     private static final PDDocument document = new PDDocument();
     private static final PDPage page = new PDPage();
@@ -32,7 +38,7 @@ public class PdfErstellen {
         
 
         //Bilder definieren
-        PDImageXObject pdImage = PDImageXObject.createFromFile("/home/annika/Dokumente/IT15-1/FlutApp/bkalogo.png", document);
+        PDImageXObject pdImage = PDImageXObject.createFromFile(pathImage, document);
 
         //Schriftarten
         PDFont font = PDType1Font.HELVETICA_BOLD;
@@ -40,7 +46,7 @@ public class PdfErstellen {
 
         //Inhalt pdf  
         //Betreff
-        hinzufuegen("Spendenquittung für die Flutkatastrophe", font, 12, 50, 575);
+        hinzufuegen(betreff, font, 12, 50, 575);
 
         //Kopfzeile
         contentStream.drawImage(pdImage, 450, 630);
@@ -55,16 +61,16 @@ public class PdfErstellen {
         hinzufuegen(datum, font, 12, 345, 500);
 
         //Inhalt
-        hinzufuegen("Wir danken Ihnen für Ihre Spende!", font2, 12, 50, 375);
+        hinzufuegen(inhalt, font2, 12, 50, 375);
 
         //Fußzeile
-        hinzufuegen("Diese Rechnung wurde automatisch generiert und ist damit auch ohne Unterschrift rechtsgültig.", font2, 12, 50, 150);
+        hinzufuegen(fusszeile, font2, 12, 50, 150);
 
         //Content Stream schließen
         contentStream.close();
 
         //Abspeichern
-        document.save("Rechnung.pdf");
+        document.save(pdfDatei);
         document.close();
     }
 
