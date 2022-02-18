@@ -1,9 +1,8 @@
-# FlutApp
+# flutapp.properties
 
 #E-Mail
 user = 
 password = 
-
 host = 
 port = 
 betreff =
